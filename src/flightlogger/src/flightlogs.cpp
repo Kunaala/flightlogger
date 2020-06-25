@@ -13,14 +13,15 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 //#include <tf2/LinearMath/Quaternion.h>
 #include<tf/tf.h>
-
-void imucb(const sensor_msgs::Imu::ConstPtr& msg)
+std::string homepath=std::getenv("HOME");
+std::string path=homepath+"/flightlogs.csv";        //location of flightlogs.csv
+void imucb(const sensor_msgs::Imu::ConstPtr& msg)		///callback for /mavros/imu/data subscription
   {
-   // boost::posix_time::ptime Ptime = ros::Time::now().toBoost(); //posix string time "conversion of UNIX to POSIX type"
-    //std::string curt = boost::posix_time:: to_iso_extended_string(Ptime);
+    // boost::posix_time::ptime Ptime = ros::Time::now().toBoost(); //posix string time "conversion of UNIX to POSIX type"
+    // std::string curt = boost::posix_time:: to_iso_extended_string(Ptime);
     double roll, pitch, yaw;
     std::ofstream fil;
-    fil.open("/home/nano/testimu.csv", std::fstream::app);
+    fil.open(path, std::fstream::app);
 
     fil << msg->header.seq;
     tf::Quaternion q(
@@ -37,18 +38,18 @@ void imucb(const sensor_msgs::Imu::ConstPtr& msg)
     //ROS_INFO("Imu Seq: [%d]", msg->header.seq);
     // ROS_INFO("Imu Orientation x: [%f], y: [%f], z: [%f]", msg->angular_velocity.x,msg->angular_velocity.y,msg->angular_velocity.z);
   }
-void gpscb(const sensor_msgs::NavSatFix::ConstPtr& msg)
+void gpscb(const sensor_msgs::NavSatFix::ConstPtr& msg)	///callback for /mavros/global_position/globaldata subscription
   {
     std::ofstream fil;
-    fil.open("/home/nano/testimu.csv", std::fstream::app);
+    fil.open(path, std::fstream::app);
     fil << "," << msg->latitude << "," <<msg->longitude;
     fil.close();
     //ROS_INFO("gps Seq: [%f]", msg->latitude);
   }
-void altcb(const std_msgs::Float64::ConstPtr& msg)
+void altcb(const std_msgs::Float64::ConstPtr& msg) 	///callback for /mavros/global_position/rel_alt
   {
     std::ofstream fil;
-    fil.open("/home/nano/testimu.csv", std::fstream::app);
+    fil.open(path, std::fstream::app);
     fil << "," << msg->data<< "\n";
     fil.close();
     ROS_INFO("HELLO");
@@ -56,8 +57,9 @@ void altcb(const std_msgs::Float64::ConstPtr& msg)
   } 
 int main(int argc,char** argv )
 {
+
     std::ofstream headings;
-    headings.open("/home/nano/testimu.csv", std::fstream::app);
+    headings.open(path, std::fstream::app);
     headings << "\n"<<"seq" <<","<<"angvel_x"<<","<<"angvel_y"<<","<<"angvel_z"<<","<<"linearacc_x"<<","<<"linearacc_y"<<","<<"linearacc_z"<< "," 
     << "orient_roll" << ","<<"orient_pitch"<<","<<"orient_yaw"<<","<<"lat"<<","<<"long"<<","<<"rel_alt"<<"\n";
     headings.close();
